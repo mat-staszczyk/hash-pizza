@@ -8,10 +8,6 @@ class Pizza
     @slices = []
   end
 
-  def add_slice(slice)
-    @slices << slice
-  end
-
   def verify_size
     puts "#{@pizza_arr.size} x #{@pizza_arr.first.size}"
   end
