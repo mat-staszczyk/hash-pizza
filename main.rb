@@ -88,6 +88,10 @@ class PizzaCutter
       ing_count.min >= @settings[:min_ings] and (x1 - x0) * (y1 - y0) <= @settings[:max_cells]
     end
 
+    def in_range?(slice)
+      
+    end 
+
     def possible_rectangles(area)
       ary = (1..area).find_all {|x| area % x == 0}
       ary.map! {|x| [x, ary.pop]}
@@ -104,6 +108,3 @@ class PizzaCutter
     end
 end
 
-pizza = Pizza.new(ARGV.first)
-cutter = PizzaCutter.new(pizza)
-cutter.take_slice
