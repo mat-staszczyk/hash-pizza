@@ -76,6 +76,7 @@ class PizzaCutter
 
     def is_valid?(slice)
       #slice represented as an array [x0, x1, y0, y1]
+      return false unless in_range?(slice)
       x0, x1, y0, y1 = slice
       section = @pizza[x0..x1]
       ing_count = [0, 0]
@@ -89,7 +90,8 @@ class PizzaCutter
     end
 
     def in_range?(slice)
-      
+      x0, x1, y0, y1 = slice
+      x1 <= @settings[:rows] && y1 <= @settings[:columns]
     end 
 
     def possible_rectangles(area)
