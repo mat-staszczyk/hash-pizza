@@ -38,8 +38,9 @@ class PizzaCutter
 
   def cut_pizza
     until @pizza_left.zero? || @mushrooms < @settings[:min_ings] || @tomatoes < @settings[:min_ings] do
-      # todo
+      take_slice 
     end 
+    @slices.count
   end
 
   def take_slice
@@ -49,13 +50,19 @@ class PizzaCutter
     serve_slice(slice)
   end
 
-  private
+  #private
 
     def find_slice(area)
       # find the first possible slice
-      ary = possible_rectangles(area)
-      first = ary.find {|rect| is_valid?([@pointer[0], @pointer[0] + rect[0] - 1, @pointer[1], @pointer[1] + rect[1] - 1])}
-      first = [@pointer[0], @pointer[0] + first[0] - 1, @pointer[1], @pointer[1] + first[1] - 1]
+      rects = possible_rectangles(area)
+      #first = ary.find {|rect| is_valid?([@pointer[0], @pointer[0] + rect[0] - 1, @pointer[1], @pointer[1] + rect[1] - 1])}
+      #first = [@pointer[0], @pointer[0] + first[0] - 1, @pointer[1], @pointer[1] + first[1] - 1]
+      pointer_row = @pointer[0]
+      pointer_col = @pointer[1]
+      rects.map! { |r| [pointer_row, pointer_col, 
+                        pointer_row + r[0] - 1, 
+                        pointer_col + r[1] - 1] }
+      rects.detect { |r| is_valid?(r) }
     end
 
     def cut_slice(slice)
@@ -77,7 +84,7 @@ class PizzaCutter
     def is_valid?(slice)
       #slice represented as an array [x0, x1, y0, y1]
       return false unless in_range?(slice)
-      x0, x1, y0, y1 = slice
+      x0, y0, x1, y1 = slice
       section = @pizza[x0..x1]
       ing_count = [0, 0]
       section.each do |row|
@@ -90,8 +97,8 @@ class PizzaCutter
     end
 
     def in_range?(slice)
-      x0, x1, y0, y1 = slice
-      x1 <= @settings[:rows] && y1 <= @settings[:columns]
+      r0, c0, r1, c1 = slice
+      r1 <= @settings[:rows] && c1 <= @settings[:columns]
     end 
 
     def possible_rectangles(area)
