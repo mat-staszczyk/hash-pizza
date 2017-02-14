@@ -98,7 +98,7 @@ class PizzaCutter
 
     def in_range?(slice)
       r0, c0, r1, c1 = slice
-      r1 <= @settings[:rows] && c1 <= @settings[:columns]
+      r1 < @settings[:rows] && c1 < @settings[:columns]
     end 
 
     def possible_rectangles(area)
