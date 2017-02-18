@@ -24,13 +24,13 @@ end
 class PizzaCutter
   attr_reader :slices, :pizza, :pizza_left, :pointer
 
-  def initialize(pizza)
+  def initialize(pizza, starting_point = [0, 0])
     @pizza = pizza.pizza_arr
     @tomatoes = pizza.tomatoes_count
     @mushrooms = pizza.mushrooms_count
     @slices = []
     @settings = pizza.settings
-    @pointer = [0, 0] #start in the bottom left corner of the pizza, so that it resembles the coordinate system
+    @pointer = starting_point
     @FINAL_POINTER = [@settings[:rows]-1, @settings[:columns]-1]
     @pizza_left = @settings[:rows] * @settings[:columns]
     # testing
@@ -121,15 +121,6 @@ class PizzaCutter
       @pointer == @FINAL_POINTER
     end
 
-    def d_set_pointer
-      # Todo: find the next available pointer greater than current one
-      @pizza.each_with_index do |row, r|
-        c = row.find_index { |x| x }
-        @pointer = [r,c]
-        return @pointer if c
-      end
-    end
-
     def set_pointer
       return @pointer if out_of_moves 
       pointer_r, pointer_c = @pointer[0], @pointer[1]
@@ -145,5 +136,29 @@ class PizzaCutter
       @pointer
     end
 
+end
+
+class PizzaAnalyser
+  def initialize(cutter)
+    @cutter = cutter
+  end
+
+  def count_cells(ary)
+    c0, r0, c1, r1 = ary
+    (c1 - c0 + 1) * (r1 - r0 + 1)
+  end
+
+  def area
+    @cutter.slices.reduce(0) {|sum, obj| sum + count_cells(obj)}
+  end
+
+  def coverage
+    area / (@cutter.pizza.size * @cutter.pizza.first.size.to_f)
+  end
+
+  def print_result
+    result = "%d\n" % @cutter.slices.count
+    result += @cutter.slices.map {|slice| "%d %d %d %d" % slice}.join("\n")
+  end
 end
 
