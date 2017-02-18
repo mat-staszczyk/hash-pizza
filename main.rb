@@ -31,13 +31,14 @@ class PizzaCutter
     @slices = []
     @settings = pizza.settings
     @pointer = [0, 0] #start in the bottom left corner of the pizza, so that it resembles the coordinate system
+    @FINAL_POINTER = [@settings[:rows]-1, @settings[:columns]-1]
     @pizza_left = @settings[:rows] * @settings[:columns]
     # testing
     pizza.verify_size
   end
 
   def cut_pizza
-    until @pizza_left.zero? || @mushrooms < @settings[:min_ings] || @tomatoes < @settings[:min_ings] do
+    until @pizza_left.zero? || out_of_moves || @mushrooms < @settings[:min_ings] || @tomatoes < @settings[:min_ings] do
       take_slice 
     end 
     @slices.count
@@ -45,8 +46,10 @@ class PizzaCutter
 
   def take_slice
     slice = find_slice(@settings[:max_cells])
-    cut_slice(slice) if slice
-    serve_slice(slice) if slice
+    if slice
+      cut_slice(slice) 
+      serve_slice(slice)
+    end
     set_pointer
   end
 
@@ -115,7 +118,11 @@ class PizzaCutter
       ary.uniq.sort.reverse
     end
 
-    def set_pointer
+    def out_of_moves
+      @pointer == @FINAL_POINTER
+    end
+
+    def d_set_pointer
       # Todo: find the next available pointer greater than current one
       @pizza.each_with_index do |row, r|
         c = row.find_index { |x| x }
@@ -123,5 +130,21 @@ class PizzaCutter
         return @pointer if c
       end
     end
+
+    def set_pointer
+      return @pointer if out_of_moves 
+      pointer_r, pointer_c = @pointer[0], @pointer[1]
+      if @pointer[1] == @settings[:columns]-1
+        pointer_r += 1
+        pointer_c = 0
+      else
+        pointer_c += 1
+      end
+
+      @pointer = [pointer_r, pointer_c]
+      set_pointer unless @pizza[pointer_r][pointer_c]
+      @pointer
+    end
+
 end
 
