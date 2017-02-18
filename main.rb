@@ -63,7 +63,6 @@ class PizzaCutter
       rects.map! { |r| [pointer_row, pointer_col, 
                         pointer_row + r[0] - 1, 
                         pointer_col + r[1] - 1] }
-      p rects
       rects.detect { |r| is_valid?(r) }
     end
 
