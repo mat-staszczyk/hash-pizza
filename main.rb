@@ -1,3 +1,5 @@
+require 'logger'
+
 class Pizza
   attr_reader :pizza_arr, :settings
 
@@ -25,6 +27,7 @@ class PizzaCutter
   attr_reader :slices, :pizza, :pizza_left, :pointer
 
   def initialize(pizza, starting_point = [0, 0])
+    @logger = Logger.new(STDOUT)
     @pizza = pizza.pizza_arr
     @tomatoes = pizza.tomatoes_count
     @mushrooms = pizza.mushrooms_count
@@ -40,6 +43,7 @@ class PizzaCutter
   def cut_pizza
     until @pizza_left.zero? || out_of_moves || @mushrooms < @settings[:min_ings] || @tomatoes < @settings[:min_ings] do
       take_slice 
+      @logger.debug 'current pointer: %d, %d, slices count: %d, coverage: %.3f' % (@pointer + [@slices.count, coverage])
     end 
     @slices.count
   end
@@ -53,6 +57,23 @@ class PizzaCutter
     set_pointer
   end
 
+  def area
+    slices.reduce(0) {|sum, obj| sum + count_cells(obj)}
+  end
+
+  def coverage
+    area / (pizza.size * pizza.first.size.to_f)
+  end
+
+  def stringify
+    result = "%d\n" % slices.count
+    result += slices.map {|slice| "%d %d %d %d" % slice}.join("\n")
+  end
+
+  def save_result(filename)
+    File.write(filename, stringify)
+  end
+
   private
 
     def find_slice(area)
@@ -64,6 +85,11 @@ class PizzaCutter
                         pointer_row + r[0] - 1, 
                         pointer_col + r[1] - 1] }
       rects.detect { |r| is_valid?(r) }
+    end
+
+    def count_cells(ary)
+      c0, r0, c1, r1 = ary
+      (c1 - c0 + 1) * (r1 - r0 + 1)
     end
 
     def cut_slice(slice)
@@ -135,30 +161,4 @@ class PizzaCutter
       set_pointer unless @pizza[pointer_r][pointer_c]
       @pointer
     end
-
 end
-
-class PizzaAnalyser
-  def initialize(cutter)
-    @cutter = cutter
-  end
-
-  def count_cells(ary)
-    c0, r0, c1, r1 = ary
-    (c1 - c0 + 1) * (r1 - r0 + 1)
-  end
-
-  def area
-    @cutter.slices.reduce(0) {|sum, obj| sum + count_cells(obj)}
-  end
-
-  def coverage
-    area / (@cutter.pizza.size * @cutter.pizza.first.size.to_f)
-  end
-
-  def print_result
-    result = "%d\n" % @cutter.slices.count
-    result += @cutter.slices.map {|slice| "%d %d %d %d" % slice}.join("\n")
-  end
-end
-
